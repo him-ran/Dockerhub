@@ -1,25 +1,25 @@
 version: '3.7'
+
 services:
   postgresql-master:
     image: mutemath966/pgbouncer:0.2
     ports:
-      - '5432'
-    volumes:
-      - './backups:/postgres/data'
+      - '5400:6432'
     environment:
       POSTGRESQL_REPLICATION_MODE: master
       POSTGRESQL_REPLICATION_USER: repl_user
       POSTGRESQL_REPLICATION_PASSWORD: repl_password
       POSTGRESQL_USERNAME: postgres
       POSTGRESQL_PASSWORD: root
-      POSTGRESQL_DATABASE: testdb
+      POSTGRESQL_DATABASE: nuwebapp
       ALLOW_EMPTY_PASSWORD: "yes"
-      BACKUPTIME: "00:22:00"
+      BACKUPTIME: "12:15:00"
       PGDATA: /postgres/data
-  postgresql-slave:
+      POSTGRESQL_MAX_CONNECTIONS: 500
+  postgresql-slave1:
     image: mutemath966/pgbouncer:0.2
     ports:
-      - '5432'
+      - '5401:6432'
     depends_on:
       - postgresql-master
     environment:
@@ -30,6 +30,21 @@ services:
       POSTGRESQL_PASSWORD: root
       POSTGRESQL_MASTER_PORT_NUMBER: "5432"
       ALLOW_EMPTY_PASSWORD: "yes"
-
-volumes:
-  backups:
+      POSTGRESQL_MAX_CONNECTIONS: 500
+    container_name: postgres_slave_1
+  postgresql-slave2:
+    image: mutemath966/pgbouncer:0.2
+    ports:
+      - '5402:6432'
+    depends_on:
+      - postgresql-master
+    environment:
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_REPLICATION_USER: repl_user
+      POSTGRESQL_REPLICATION_PASSWORD: repl_password
+      POSTGRESQL_MASTER_HOST: postgresql-master
+      POSTGRESQL_PASSWORD: root
+      POSTGRESQL_MASTER_PORT_NUMBER: "5432"
+      ALLOW_EMPTY_PASSWORD: "yes"
+      POSTGRESQL_MAX_CONNECTIONS: 500
+    container_name: postgres_slave_2
